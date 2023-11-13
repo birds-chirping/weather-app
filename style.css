@@ -1,0 +1,21 @@
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+.city-container {
+  max-width: 300px;
+  border: 1px solid pink;
+}
+
+.prognosis-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  border: 1px solid mediumorchid;
+}
+
+.prognosis-container > * {
+  border: 1px solid mediumseagreen;
+  margin: 1rem;
+}
