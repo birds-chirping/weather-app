@@ -2,12 +2,13 @@ import { Elements } from "../utils/elements.js";
 
 export class Today {
   forecastBtn;
+  showForecast;
 
-  constructor(locationName, weatherIconPath, weatherDescription, temp, minTemp, maxTemp, humidity, pressure) {
+  constructor(locationName, weatherIconPath, weatherDescription, temperature, minTemp, maxTemp, humidity, pressure) {
     this.locationName = locationName;
     this.weatherIconPath = weatherIconPath;
     this.weatherDescription = weatherDescription;
-    this.temp = temp;
+    this.temperature = temperature;
     this.minTemp = minTemp;
     this.maxTemp = maxTemp;
     this.humidity = humidity;
@@ -22,7 +23,7 @@ export class Today {
        <p>${this.weatherDescription}</p>
        <p>Humidity: ${this.humidity}</p>
        <p>Pressure: ${this.pressure}</p>
-       <p>Temp: ${this.temp}</p>
+       <p>Temperature: ${this.temperature}°C</p>
        <p>Min temp: ${this.minTemp}</p>
        <p>Max temp:${this.maxTemp}</p>
     `;
@@ -39,7 +40,7 @@ export class Today {
     return this.forecastBtn;
   }
 
-  addTo(parentContainer) {
+  addElementTo(parentContainer) {
     parentContainer.append(this.createCard(), this.addForecastBtn());
   }
 

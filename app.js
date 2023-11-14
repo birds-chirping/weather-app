@@ -7,7 +7,7 @@ class WeatherApp {
   input;
   searchBtn;
   weatherContainer;
-  location;
+  selectedLocation;
 
   constructor() {
     this.init();
@@ -15,14 +15,14 @@ class WeatherApp {
 
   init() {
     this.appWrapper = Elements.createElement("div", "weatherapp-wrapper");
-    this.weatherContainer = Elements.createElement("div", "weather-container");
+    this.weatherContainer = Elements.createElement("div", "weatherapp-container");
     this.appWrapper.append(this.createHeader(), this.weatherContainer);
     this.addEvents();
     this.getWeather();
   }
 
   createHeader() {
-    const header = Elements.createElement("div", "widget-header");
+    const header = Elements.createElement("div", "weatherapp-header");
     this.input = Elements.createElement("input", "location-input");
     this.searchBtn = Elements.createElement("button", "search-button");
     this.searchBtn.textContent = "Search";
@@ -36,23 +36,22 @@ class WeatherApp {
 
   getWeather() {
     this.clearWeatherContainer();
-    this.location = this.input.value || "Honolulu";
-    this.addTodaysWeatherContainer();
+    this.selectedLocation = this.input.value || "Honolulu";
+    this.addTodaysWeather();
   }
 
   clearWeatherContainer() {
     this.weatherContainer.innerHTML = "";
   }
 
-  addTodaysWeatherContainer() {
+  addTodaysWeather() {
     fetch(
-      `https://api.openweathermap.org/data/2.5/weather?appid=69518b1f8f16c35f8705550dc4161056&units=metric&q=${this.location}`
+      `https://api.openweathermap.org/data/2.5/weather?appid=69518b1f8f16c35f8705550dc4161056&units=metric&q=${this.selectedLocation}`
     )
       .then((response) => {
         return response.ok ? response.json() : Promise.reject(response);
       })
       .then((location) => {
-        console.log(location);
         const today = new Today(
           location.name,
           `http://openweathermap.org/img/w/${location.weather[0].icon}.png`,
@@ -63,45 +62,57 @@ class WeatherApp {
           location.main.humidity,
           location.main.pressure
         );
-        today.bindForecast(this.addForecast);
-        today.addTo(this.weatherContainer);
+        today.bindForecast(this.addForecast.bind(this));
+        today.addElementTo(this.weatherContainer);
       })
       .catch((error) => {
         // console.log(error);
         error.json().then((error) => {
           this.weatherContainer.innerHTML = `
-      <div>${error.message}</div>`;
+      <div class="error-message">${error.message}</div>`;
         });
       });
   }
 
-  addForecast = (location) => {
+  addForecast(location) {
     fetch(
       `https://api.openweathermap.org/data/2.5/forecast?appid=69518b1f8f16c35f8705550dc4161056&units=metric&q=${location}`
     )
       .then((response) => {
         return response.ok ? response.json() : Promise.reject(response);
       })
-      .then((location) => {
-        const forecast = new Forecast(location.list);
-        forecast.addTo(this.weatherContainer);
+      .then((locationForecast) => {
+        this.showForecastByDay(locationForecast);
       })
       .catch((error) => {
-        // console.log(error);
+        console.log(error);
         error.json().then((error) => {
           const errorContainer = Elements.createElement("div", "error-container");
           errorContainer.textContent = error.message;
           this.weatherContainer.appendChild(errorContainer);
         });
       });
-  };
+  }
 
-  addTo(parentContainer) {
+  showForecastByDay(locationForecast) {
+    const forecast = new Forecast();
+    forecast.addElementTo(this.weatherContainer);
+
+    locationForecast.list.forEach((weatherByTime) => {
+      const date = new Date(weatherByTime.dt_txt);
+      const iconSrc = `http://openweathermap.org/img/w/${weatherByTime.weather[0].icon}.png`;
+      const mainTemp = weatherByTime.main.temp;
+      const description = weatherByTime.weather[0].description;
+      forecast.addForecastToDay(date, iconSrc, mainTemp, description);
+    });
+  }
+
+  addElementTo(parentContainer) {
     parentContainer.appendChild(this.appWrapper);
   }
 }
 
 const container = document.querySelector(".app");
 const app = new WeatherApp();
-app.addTo(container);
-console.log(app);
+app.addElementTo(container);
+// console.log(app);
