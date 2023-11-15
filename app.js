@@ -1,6 +1,7 @@
 import { Today } from "./components/today-card.js";
 import { Forecast } from "./components/forecast.js";
 import { Elements } from "./utils/elements.js";
+import { WeatherApi } from "./api/weatherApi.js";
 
 class WeatherApp {
   appWrapper;
@@ -37,73 +38,67 @@ class WeatherApp {
   getWeather() {
     this.clearWeatherContainer();
     this.selectedLocation = this.input.value || "Honolulu";
-    this.addTodaysWeather();
+    this.addCurrentWeather();
   }
 
   clearWeatherContainer() {
     this.weatherContainer.innerHTML = "";
   }
 
-  addTodaysWeather() {
-    fetch(
-      `https://api.openweathermap.org/data/2.5/weather?appid=69518b1f8f16c35f8705550dc4161056&units=metric&q=${this.selectedLocation}`
-    )
-      .then((response) => {
-        return response.ok ? response.json() : Promise.reject(response);
-      })
-      .then((location) => {
-        const today = new Today(
-          location.name,
-          `http://openweathermap.org/img/w/${location.weather[0].icon}.png`,
-          location.weather[0].description,
-          location.main.temp,
-          location.main.temp_min,
-          location.main.temp_max,
-          location.main.humidity,
-          location.main.pressure
-        );
-        today.bindForecast(this.addForecast.bind(this));
-        today.addElementTo(this.weatherContainer);
-      })
-      .catch((error) => {
-        // console.log(error);
-        error.json().then((error) => {
-          this.weatherContainer.innerHTML = `
-      <div class="error-message">${error.message}</div>`;
-        });
-      });
+  // async getCoordinates(locationName) {
+  //   const response = await fetch(
+  //     `http://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=b7dc06214c8eb8092caccdf552fe5acf`
+  //   );
+  //   const data = await response.json();
+  //   return data;
+  // }
+
+  async addCurrentWeather() {
+    const location = await WeatherApi.getCurrentWeatherByLocation(this.selectedLocation);
+
+    if (location.cod != "200") {
+      this.weatherContainer.innerHTML = `
+    <div class="error-message">${location.message}</div>`;
+      return;
+    }
+
+    const today = new Today(
+      location.name,
+      await WeatherApi.getIcon(location.weather[0].icon, "large"),
+      location.weather[0].description,
+      location.main.temp,
+      location.main.temp_min,
+      location.main.temp_max,
+      location.main.humidity,
+      location.main.pressure
+    );
+    today.bindForecast(this.addForecast.bind(this));
+    today.addElementTo(this.weatherContainer);
   }
 
-  addForecast(location) {
-    fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?appid=69518b1f8f16c35f8705550dc4161056&units=metric&q=${location}`
-    )
-      .then((response) => {
-        return response.ok ? response.json() : Promise.reject(response);
-      })
-      .then((locationForecast) => {
-        this.showForecastByDay(locationForecast);
-      })
-      .catch((error) => {
-        console.log(error);
-        error.json().then((error) => {
-          const errorContainer = Elements.createElement("div", "error-container");
-          errorContainer.textContent = error.message;
-          this.weatherContainer.appendChild(errorContainer);
-        });
-      });
+  async addForecast(location) {
+    const forecast = await WeatherApi.getForecast(location);
+
+    if (forecast.cod != "200") {
+      const errorContainer = Elements.createElement("div", "error-container");
+      errorContainer.textContent = forecast.message;
+      this.weatherContainer.appendChild(errorContainer);
+      return;
+    }
+
+    this.showForecastByDay(forecast);
   }
 
   showForecastByDay(locationForecast) {
     const forecast = new Forecast();
     forecast.addElementTo(this.weatherContainer);
 
-    locationForecast.list.forEach((weatherByTime) => {
-      const date = new Date(weatherByTime.dt_txt);
-      const iconSrc = `http://openweathermap.org/img/w/${weatherByTime.weather[0].icon}.png`;
+    locationForecast.list.forEach(async (weatherByTime) => {
+      const dateTime = weatherByTime.dt_txt;
+      const iconSrc = await WeatherApi.getIcon(weatherByTime.weather[0].icon);
       const mainTemp = weatherByTime.main.temp;
       const description = weatherByTime.weather[0].description;
-      forecast.addForecastToDay(date, iconSrc, mainTemp, description);
+      forecast.addForecastToDay(dateTime, iconSrc, mainTemp, description);
     });
   }
 

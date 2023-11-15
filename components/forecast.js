@@ -22,7 +22,8 @@ export class Forecast {
     this.forecastContainer.appendChild(newDay);
   }
 
-  addForecastToDay(date, iconSrc, mainTemp, description) {
+  addForecastToDay(dateTime, iconSrc, mainTemp, description) {
+    const date = new Date(dateTime);
     const dayName = date.toLocaleDateString("en-UK", { weekday: "long" });
     const time = date.toLocaleTimeString("en-UK", { hour: "2-digit", minute: "2-digit" });
 
