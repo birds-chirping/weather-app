@@ -1,10 +1,12 @@
 import { Today } from "./components/today-card.js";
-import { Forecast } from "./components/forecast.js";
-import { Elements } from "./utils/elements.js";
-import { WeatherApi } from "./api/weatherApi.js";
 import { Map } from "./components/map.js";
+import { Forecast } from "./components/forecast.js";
+import { WeatherAPI } from "./api/weather.js";
+import { GeocodingAPI } from "./api/geocoding.js";
+import { Elements } from "./utils/elements.js";
 
 class WeatherApp {
+  defaultLocation;
   appWrapper;
   input;
   searchBtn;
@@ -16,10 +18,11 @@ class WeatherApp {
   }
 
   init() {
+    this.defaultLocation = "Honolulu";
     this.appWrapper = Elements.createElement("div", "weatherapp-wrapper");
     this.weatherContainer = Elements.createElement("div", "weatherapp-container");
     this.map = new Map();
-    this.appWrapper.append(this.createHeader(), this.map.mapContainer, this.weatherContainer);
+    this.appWrapper.append(this.createHeader(), this.map.mapElement, this.weatherContainer);
     this.addEvents();
     this.getWeather();
   }
@@ -37,37 +40,24 @@ class WeatherApp {
     this.searchBtn.addEventListener("click", this.getWeather.bind(this));
   }
 
-  async getWeather() {
+  getWeather() {
     this.clearWeatherContainer();
-    this.selectedLocation = this.input.value || "Honolulu";
+    this.selectedLocation = this.input.value || this.defaultLocation;
     this.addCurrentWeather();
     this.updateMap();
+    this.input.value = "";
   }
 
   clearWeatherContainer() {
     this.weatherContainer.innerHTML = "";
   }
 
-  async getCoordinates(locationName) {
-    const response = await fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=b7dc06214c8eb8092caccdf552fe5acf`
-    );
-    const data = await response.json();
-    return data;
-  }
-
-  async updateMap() {
-    const coordinates = await this.getCoordinates(this.selectedLocation);
-    const lat = coordinates[0].lat;
-    const lon = coordinates[0].lon;
-    console.log(lat, lon);
-    this.map.updateMap(lat, lon);
-  }
-
   async addCurrentWeather() {
-    const location = await WeatherApi.getCurrentWeatherByLocation(this.selectedLocation);
+    const location = await WeatherAPI.getCurrentWeatherByLocation(this.selectedLocation);
 
     if (location.cod != "200") {
+      this.selectedLocation = this.defaultLocation;
+      this.updateMap();
       this.weatherContainer.innerHTML = `
     <div class="error-message">${location.message}</div>`;
       return;
@@ -75,7 +65,7 @@ class WeatherApp {
 
     const today = new Today(
       location.name,
-      await WeatherApi.getIcon(location.weather[0].icon, "large"),
+      await WeatherAPI.getIcon(location.weather[0].icon, "large"),
       location.weather[0].description,
       location.main.temp,
       location.main.temp_min,
@@ -88,7 +78,7 @@ class WeatherApp {
   }
 
   async addForecast(location) {
-    const forecast = await WeatherApi.getForecast(location);
+    const forecast = await WeatherAPI.getForecast(location);
 
     if (forecast.cod != "200") {
       const errorContainer = Elements.createElement("div", "error-container");
@@ -106,11 +96,18 @@ class WeatherApp {
 
     locationForecast.list.forEach(async (weatherByTime) => {
       const dateTime = weatherByTime.dt_txt;
-      const iconSrc = await WeatherApi.getIcon(weatherByTime.weather[0].icon);
+      const iconSrc = await WeatherAPI.getIcon(weatherByTime.weather[0].icon);
       const mainTemp = weatherByTime.main.temp;
       const description = weatherByTime.weather[0].description;
       forecast.addForecastToDay(dateTime, iconSrc, mainTemp, description);
     });
+  }
+
+  async updateMap() {
+    const coordinates = await GeocodingAPI.getCoordinates(this.selectedLocation);
+    const lat = coordinates[0].lat;
+    const lon = coordinates[0].lon;
+    this.map.updateMap(lat, lon);
   }
 
   addElementTo(parentContainer) {

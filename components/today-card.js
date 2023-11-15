@@ -8,9 +8,9 @@ export class Today {
     this.locationName = locationName;
     this.weatherIconPath = weatherIconPath;
     this.weatherDescription = weatherDescription;
-    this.temperature = temperature;
-    this.minTemp = minTemp;
-    this.maxTemp = maxTemp;
+    this.temperature = Math.round(temperature);
+    this.minTemp = Math.round(minTemp);
+    this.maxTemp = Math.round(maxTemp);
     this.humidity = humidity;
     this.pressure = pressure;
   }
@@ -18,14 +18,42 @@ export class Today {
   createCard() {
     const card = Elements.createElement("div", "today-card");
     card.innerHTML = `
-       <h2>${this.locationName}</h2>
-       <img src=${this.weatherIconPath}>
-       <p>${this.weatherDescription}</p>
-       <p>Humidity: ${this.humidity}</p>
-       <p>Pressure: ${this.pressure}</p>
-       <p>Temperature: ${this.temperature}°C</p>
-       <p>Min temp: ${this.minTemp}</p>
-       <p>Max temp:${this.maxTemp}</p>
+    <div class='today'>
+      <div class='title'>${this.locationName}</div>
+        <div class='weather-info'>
+          <div class='left'>
+            <img class='icon' src=${this.weatherIconPath}>
+            <div class='weather-state'>
+              <div class='temperature'>${this.temperature}°</div>
+              <div class='description'>${this.weatherDescription}</div>
+            </div>
+          </div>
+
+          <div class='right'>
+            <div class='low-high'>
+              <div class='extra-info'>
+                <div>${this.minTemp}°</div>
+                <div>Low</div>
+              </div>
+              <div class='extra-info'>
+                <div>${this.maxTemp}°</div>
+                <div>High</div>
+              </div>
+            </div>
+            <div class='other-info'>
+              <div class='extra-info'>
+                <div>${this.humidity}</div>
+                <div>Humidity</div>
+              </div>
+              <div class='extra-info'>
+                <div>${this.pressure}</div>
+                <div>Pressure</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     `;
     return card;
   }
