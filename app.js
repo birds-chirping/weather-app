@@ -2,6 +2,7 @@ import { Today } from "./components/today-card.js";
 import { Forecast } from "./components/forecast.js";
 import { Elements } from "./utils/elements.js";
 import { WeatherApi } from "./api/weatherApi.js";
+import { Map } from "./components/map.js";
 
 class WeatherApp {
   appWrapper;
@@ -17,7 +18,8 @@ class WeatherApp {
   init() {
     this.appWrapper = Elements.createElement("div", "weatherapp-wrapper");
     this.weatherContainer = Elements.createElement("div", "weatherapp-container");
-    this.appWrapper.append(this.createHeader(), this.weatherContainer);
+    this.map = new Map();
+    this.appWrapper.append(this.createHeader(), this.map.mapContainer, this.weatherContainer);
     this.addEvents();
     this.getWeather();
   }
@@ -35,23 +37,32 @@ class WeatherApp {
     this.searchBtn.addEventListener("click", this.getWeather.bind(this));
   }
 
-  getWeather() {
+  async getWeather() {
     this.clearWeatherContainer();
     this.selectedLocation = this.input.value || "Honolulu";
     this.addCurrentWeather();
+    this.updateMap();
   }
 
   clearWeatherContainer() {
     this.weatherContainer.innerHTML = "";
   }
 
-  // async getCoordinates(locationName) {
-  //   const response = await fetch(
-  //     `http://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=b7dc06214c8eb8092caccdf552fe5acf`
-  //   );
-  //   const data = await response.json();
-  //   return data;
-  // }
+  async getCoordinates(locationName) {
+    const response = await fetch(
+      `http://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=b7dc06214c8eb8092caccdf552fe5acf`
+    );
+    const data = await response.json();
+    return data;
+  }
+
+  async updateMap() {
+    const coordinates = await this.getCoordinates(this.selectedLocation);
+    const lat = coordinates[0].lat;
+    const lon = coordinates[0].lon;
+    console.log(lat, lon);
+    this.map.updateMap(lat, lon);
+  }
 
   async addCurrentWeather() {
     const location = await WeatherApi.getCurrentWeatherByLocation(this.selectedLocation);
