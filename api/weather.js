@@ -17,7 +17,7 @@ export class WeatherAPI {
     return forecast;
   }
 
-  static async getIcon(code, size = "") {
+  static getIcon(code, size = "") {
     switch (size) {
       case "medium":
         size = "@2x";

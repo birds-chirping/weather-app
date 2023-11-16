@@ -33,12 +33,12 @@ export class Forecast {
     }
 
     this.dayContent.innerHTML += `
-      <div class="hour-forecast">
-          <img src=${iconSrc}>
-          <p>${description}</p>
-          <p>${mainTemp}°C</p>
-          <p>${time}<p>
-      </div>`;
+    <div class="hour-forecast">
+        <div class='temperature'>${mainTemp}°C</div>
+        <div class='icon-wrapper'><img src=${iconSrc}></div>
+        <div class='description'>${description}</div>
+        <div class='time'>${time}</div>
+    </div>`;
   }
 
   addElementTo(parentContainer) {
