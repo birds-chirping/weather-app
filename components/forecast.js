@@ -34,7 +34,7 @@ export class Forecast {
 
     this.dayContent.innerHTML += `
     <div class="hour-forecast">
-        <div class='temperature'>${mainTemp}°C</div>
+        <div class='temperature'>${mainTemp}°</div>
         <div class='icon-wrapper'><img src=${iconSrc}></div>
         <div class='description'>${description}</div>
         <div class='time'>${time}</div>
