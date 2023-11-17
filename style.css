@@ -24,13 +24,13 @@ body {
 }
 
 .weatherapp-container {
-  width: 52rem;
+  width: 54rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   background-color: white;
   margin: auto;
-  padding: 2rem;
+  padding: 2rem 3rem;
 }
 
 .weatherapp-header {
@@ -170,6 +170,10 @@ body {
   display: flex;
   justify-content: flex-end;
   padding: 1rem 0;
+}
+
+.day-forecast-container:last-child .day-forecast-content {
+  justify-content: flex-start;
 }
 
 .hour-forecast {
