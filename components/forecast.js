@@ -10,7 +10,7 @@ export class Forecast {
   }
 
   init() {
-    this.forecastContainer = Elements.createElement("div", "forecast-container");
+    this.forecastContainer = Elements.createElement("div", "forecast-container", "hide");
   }
 
   addNewDay(dayName) {
@@ -39,6 +39,13 @@ export class Forecast {
         <div class='description'>${description}</div>
         <div class='time'>${time}</div>
     </div>`;
+  }
+
+  show() {
+    this.forecastContainer.classList.remove("hide");
+  }
+  clearForecast() {
+    this.forecastContainer.innerHTML = "";
   }
 
   addElementTo(parentContainer) {

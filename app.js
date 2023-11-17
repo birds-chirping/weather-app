@@ -68,33 +68,32 @@ class WeatherApp {
       location.main.pressure
     );
     today.bindForecast(this.addForecast.bind(this));
-    this.weatherContainer.appendChild(today.card);
+    this.forecast = new Forecast();
+    this.weatherContainer.append(today.card, this.forecast.forecastContainer);
   }
 
   async addForecast(location) {
-    const forecast = await WeatherAPI.getForecast(location);
+    const forecastData = await WeatherAPI.getForecast(location);
 
-    if (forecast.cod != "200") {
+    if (forecastData.cod != "200") {
       const errorContainer = Elements.createElement("div", "error-container");
-      errorContainer.textContent = forecast.message;
+      errorContainer.textContent = forecastData.message;
       this.weatherContainer.appendChild(errorContainer);
       return;
     }
-
-    this.showForecastByDay(forecast);
+    this.showForecastByDay(forecastData);
   }
 
   showForecastByDay(locationForecast) {
-    const forecast = new Forecast();
-    forecast.addElementTo(this.weatherContainer);
-
+    this.forecast.clearForecast();
     locationForecast.list.forEach(async (weatherByTime) => {
       const dateTime = weatherByTime.dt_txt;
       const iconSrc = WeatherAPI.getIcon(weatherByTime.weather[0].icon);
       const mainTemp = Math.round(weatherByTime.main.temp);
       const description = weatherByTime.weather[0].description;
-      forecast.addForecastToDay(dateTime, iconSrc, mainTemp, description);
+      this.forecast.addForecastToDay(dateTime, iconSrc, mainTemp, description);
     });
+    this.forecast.show();
   }
 
   addElementTo(parentContainer) {
