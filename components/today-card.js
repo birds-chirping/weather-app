@@ -80,7 +80,7 @@ export class Today {
 
   createForecastBtn() {
     this.forecastBtn = Elements.createElement("button", "forecast-btn");
-    this.forecastBtn.textContent = "Forecast";
+    this.forecastBtn.textContent = "5-Day Weather Forecast";
 
     this.forecastBtn.addEventListener("click", () => {
       this.showForecast(this.locationName);
