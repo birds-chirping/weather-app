@@ -1,11 +1,11 @@
-import { Today } from "./components/today-card.js";
+import { CurrentWeather } from "./components/current-weather.js";
 import { Forecast } from "./components/forecast.js";
 import { WeatherAPI } from "./api/weather.js";
 import { Elements } from "./utils/elements.js";
 
 class WeatherApp {
   defaultLocation;
-  appWrapper;
+  weatherappWrapper;
   input;
   searchBtn;
   weatherContainer;
@@ -17,9 +17,9 @@ class WeatherApp {
 
   init() {
     this.defaultLocation = "Honolulu";
-    this.appWrapper = Elements.createElement("div", "weatherapp-container");
-    this.weatherContainer = Elements.createElement("div", "weather-container");
-    this.appWrapper.append(this.createHeader(), this.weatherContainer);
+    this.weatherappWrapper = Elements.createElement("div", "weatherapp");
+    this.weatherContainer = Elements.createElement("div", "weatherapp-weather-container");
+    this.weatherappWrapper.append(this.createHeader(), this.weatherContainer);
     this.addEvents();
     this.getWeather();
   }
@@ -36,68 +36,79 @@ class WeatherApp {
 
   addEvents() {
     this.searchBtn.addEventListener("click", this.getWeather.bind(this));
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "Enter" && this.input.value.length > 0) this.getWeather();
+    });
   }
 
   getWeather() {
-    this.clearWeatherContainer();
     this.selectedLocation = this.input.value || this.defaultLocation;
     this.addCurrentWeather();
     this.input.value = "";
   }
 
-  clearWeatherContainer() {
-    this.weatherContainer.innerHTML = "";
-  }
-
   async addCurrentWeather() {
-    const location = await WeatherAPI.getCurrentWeatherByLocation(this.selectedLocation);
-
-    if (location.cod != "200") {
-      this.weatherContainer.innerHTML = `<div class="error-message">${location.message}</div>`;
+    this.weatherContainer.innerHTML = "";
+    const data = await this.getCurrentWeatherData(this.selectedLocation);
+    if (data.cod != 200) {
+      this.showError(data.message, this.weatherContainer);
       return;
     }
-
-    const today = new Today(
-      location.name,
-      WeatherAPI.getIcon(location.weather[0].icon, "large"),
-      location.weather[0].description,
-      Math.round(location.main.temp),
-      Math.round(location.main.temp_min),
-      Math.round(location.main.temp_max),
-      location.main.humidity,
-      location.main.pressure
-    );
-    today.bindForecast(this.addForecast.bind(this));
+    const currentWeather = new CurrentWeather(data);
+    currentWeather.bindForecast(this.addForecast.bind(this));
     this.forecast = new Forecast();
-    this.weatherContainer.append(today.card, this.forecast.forecastContainer);
+    this.weatherContainer.append(currentWeather.card, currentWeather.forecastBtn, this.forecast.forecastContainer);
+  }
+
+  async getCurrentWeatherData(location) {
+    const data = await WeatherAPI.getCurrentWeatherByLocation(location);
+    if (data.cod != "200") {
+      return data;
+    }
+    return {
+      cod: data.cod,
+      locationName: data.name,
+      weatherIconPath: WeatherAPI.getIcon(data.weather[0].icon, "large"),
+      weatherDescription: data.weather[0].description,
+      temperature: Math.round(data.main.temp),
+      minTemp: Math.round(data.main.temp_min),
+      maxTemp: Math.round(data.main.temp_max),
+      humidity: data.main.humidity,
+      pressure: data.main.pressure,
+    };
   }
 
   async addForecast(location) {
-    const forecastData = await WeatherAPI.getForecast(location);
-
-    if (forecastData.cod != "200") {
-      const errorContainer = Elements.createElement("div", "error-container");
-      errorContainer.textContent = forecastData.message;
-      this.weatherContainer.appendChild(errorContainer);
+    this.forecast.clearForecast();
+    const data = await this.getForecastData(location);
+    if (data.cod != 200) {
+      this.showError(data.message, this.forecast.forecastContainer);
+      this.forecast.show();
       return;
     }
-    this.showForecastByDay(forecastData);
-  }
-
-  showForecastByDay(locationForecast) {
-    this.forecast.clearForecast();
-    locationForecast.list.forEach(async (weatherByTime) => {
+    data.list.forEach(async (weatherByTime) => {
       const dateTime = weatherByTime.dt_txt;
-      const iconSrc = WeatherAPI.getIcon(weatherByTime.weather[0].icon);
-      const mainTemp = Math.round(weatherByTime.main.temp);
+      const weatherIconPath = WeatherAPI.getIcon(weatherByTime.weather[0].icon);
+      const temperature = Math.round(weatherByTime.main.temp);
       const description = weatherByTime.weather[0].description;
-      this.forecast.addForecastToDay(dateTime, iconSrc, mainTemp, description);
+      this.forecast.addForecastToDay(dateTime, weatherIconPath, temperature, description);
     });
     this.forecast.show();
   }
 
+  async getForecastData(location) {
+    const data = await WeatherAPI.getForecast(location);
+    return data;
+  }
+
+  showError(message, container) {
+    const error = Elements.createElement("div", "error-message");
+    error.textContent = message;
+    container.appendChild(error);
+  }
+
   addElementTo(parentContainer) {
-    parentContainer.appendChild(this.appWrapper);
+    parentContainer.appendChild(this.weatherappWrapper);
   }
 }
 

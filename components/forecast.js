@@ -22,7 +22,7 @@ export class Forecast {
     this.forecastContainer.appendChild(newDay);
   }
 
-  addForecastToDay(dateTime, iconSrc, mainTemp, description) {
+  addForecastToDay(dateTime, weatherIconPath, temperature, description) {
     const date = new Date(dateTime);
     const today = new Date();
     const dayName =
@@ -38,8 +38,8 @@ export class Forecast {
 
     this.dayContent.innerHTML += `
     <div class="hour-forecast">
-        <div class='temperature'>${mainTemp}°</div>
-        <div class='icon-wrapper'><img src=${iconSrc}></div>
+        <div class='temperature'>${temperature}°</div>
+        <div class='icon-wrapper'><img src=${weatherIconPath}></div>
         <div class='description'>${description}</div>
         <div class='time'>${time}</div>
     </div>`;
@@ -48,6 +48,7 @@ export class Forecast {
   show() {
     this.forecastContainer.classList.remove("hide");
   }
+
   clearForecast() {
     this.forecastContainer.innerHTML = "";
   }

@@ -16,17 +16,23 @@
 }
 
 body {
-  background-color: #fafafa;
-  /* background-color: #bedaff; */
+  height: 100vh;
+  background-color: #c5c5c5;
+  background: linear-gradient(to top, #8c8697, #c5c5c5, #f0f0f0);
+  /* background: linear-gradient(5deg, #8c8697, #cde8ff, #f0f0f0); */
+  /* background: linear-gradient(to top, rgb(112, 159, 247), #00aaff, #50c5ff); */
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 .app {
-  /* max-width: 80rem;
-  min-height: 100vh; */
-  margin: auto;
+  width: calc(100vw - 30px);
+  min-width: 54rem;
 }
 
-.weatherapp-container {
+/* ------------------------- weather app ------------------------ */
+.weatherapp {
   min-width: 54rem;
   max-width: 70rem;
   display: flex;
@@ -35,6 +41,8 @@ body {
   margin: auto;
   padding: 1rem;
 }
+
+/* ------------- header --------------- */
 
 .weatherapp-header {
   display: flex;
@@ -71,13 +79,16 @@ body {
   color: var(--accent-color-light);
 }
 
-.weather-container {
+/* ----------------- weather container----------------- */
+
+.weatherapp-weather-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
-.today {
+/* --------- current weather ---------- */
+
+.current-weather-card {
   display: flex;
   flex-direction: column;
   color: var(--the-gray);
@@ -87,24 +98,20 @@ body {
   overflow: hidden;
 }
 
-.today .title {
+.current-weather-card .title {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--the-gray);
   padding: 1rem;
 }
 
-.today .weather-info {
+.current-weather-card .weather-info {
   display: flex;
-  padding: 3rem 1rem 0rem;
+  padding: 2rem 1rem;
 }
 
-.today .weather-info > * {
+.current-weather-card .weather-info .left {
   flex: 1;
-  border-bottom: 1px solid var(--the-light-gray);
-}
-
-.today .left {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,7 +132,8 @@ body {
   font-size: 1.2rem;
 }
 
-.right {
+.current-weather-card .weather-info .right {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
@@ -141,6 +149,8 @@ body {
   font-size: 2rem;
   font-weight: 700;
 }
+
+/* --------- forecast button --------- */
 
 .forecast-btn {
   align-self: center;
@@ -163,6 +173,7 @@ body {
 }
 
 /* -----------------forecast container----------------- */
+
 .forecast-container {
   background-color: white;
   border-radius: 10px;
@@ -225,4 +236,17 @@ body {
 
 .hide {
   display: none;
+}
+
+/* ------------ error message ------------ */
+
+.error-message {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: var(--the-dark-gray);
+  box-shadow: 1px 1px 5px rgba(33, 32, 32, 0.3);
 }
