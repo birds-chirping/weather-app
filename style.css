@@ -20,7 +20,7 @@ body {
 }
 
 .app {
-  /* width: 95vw; */
+  padding-left: calc(100vw - 100%);
 }
 
 .weatherapp-container {
