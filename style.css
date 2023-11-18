@@ -207,7 +207,13 @@ body {
   display: flex;
   flex-direction: column;
   color: white;
-  background: linear-gradient(rgb(0, 77, 154) 20%, rgba(0, 77, 154, 0.774) 38%, rgba(0, 77, 154, 0.193));
+  /* background: linear-gradient(rgb(0, 77, 154) 20%, rgba(0, 77, 154, 0.774) 38%, rgba(0, 77, 154, 0.193)); */
+  background: linear-gradient(
+    rgba(42, 114, 230, 0.75) 20%,
+    rgba(42, 114, 230, 0.6) 38%,
+    rgba(42, 89, 230, 0.2),
+    transparent
+  );
   border-radius: 5px;
   margin: 0.25rem;
   padding: 1rem 0.25rem;
